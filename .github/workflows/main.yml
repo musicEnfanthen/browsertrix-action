@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
+      - name: Create collection name
+        run: echo "${${{ github.event.inputs.url }}//\//-}" 
+      
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
       
