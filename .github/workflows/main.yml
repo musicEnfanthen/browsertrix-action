@@ -17,7 +17,9 @@ jobs:
     steps:
       
       - name: Create collection name
-        run: echo "${${{ github.event.inputs.url }}//\//-}" 
+        run: |
+          url=${{ github.event.inputs.url }}
+          echo "${url//\//-}" 
       
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
