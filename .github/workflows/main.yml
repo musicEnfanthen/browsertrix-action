@@ -1,0 +1,15 @@
+name: Brwosertrix action
+on:
+  workflow_dispatch: # trigger manually
+    inputs:
+        url:
+          description: 'Url to crawl'
+          required: true
+
+
+jobs:
+  crawl-url:
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker pull webrecorder/browsertrix-crawler
+      - run: docker run -v $PWD/crawls:/crawls/ -it webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --generateWACZ --text --collection test
