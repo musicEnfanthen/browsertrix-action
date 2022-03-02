@@ -20,7 +20,7 @@ jobs:
         run: docker pull webrecorder/browsertrix-crawler
       
       - name: Crawl site
-        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --generateWACZ --text --collection test
+        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${{ env.WACZ_BUILD }}
      
       - run: ls -R
      
