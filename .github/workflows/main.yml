@@ -6,10 +6,26 @@ on:
           description: 'Url to crawl'
           required: true
 
+# globals
+env:
+# build artifacts
+  WACZ_BUILD: wacz-build
 
 jobs:
-  crawl-url:
+  crawl_url:
     runs-on: ubuntu-latest
     steps:
-      - run: docker pull webrecorder/browsertrix-crawler
-      - run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --generateWACZ --text --collection test
+      
+      - name: Setup docker
+        run: docker pull webrecorder/browsertrix-crawler
+      
+      - name: Crawl site
+        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --generateWACZ --text --collection test
+     
+      - run: ls -R
+     
+     # - name: Upload WACZ artifact
+     #   uses: actions/upload-artifact@v2
+     #   with:
+     #     name: ${{ env.CLI_BUILD }}
+     #     path: ${{ github.workspace }}/${{ env.WACZ_BUILD }}/cli.txt
