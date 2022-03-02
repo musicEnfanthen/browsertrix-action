@@ -35,8 +35,8 @@ jobs:
      
       - run: ls -R
      
-     # - name: Upload WACZ artifact
-     #   uses: actions/upload-artifact@v2
-     #   with:
-     #     name: ${{ env.CLI_BUILD }}
-     #     path: ${{ github.workspace }}/${{ env.WACZ_BUILD }}/cli.txt
+      - name: Upload WACZ artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${COLLECTION}
+          path: ${{ github.workspace }}/crawls/collection/${COLLECTION}/${COLLECTION}.wacz
