@@ -21,14 +21,16 @@ jobs:
           url=${{ github.event.inputs.url }}
           url=${url/http:\/\//}
           url=${url/https:\/\//}
-          url="${url//\//_}
+          url=${url//\//_}
           echo url
+          
+          echo COLLECTION=url >> $GITHUB_ENV
       
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
       
       - name: Crawl site
-        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${{ env.WACZ_BUILD }}
+        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${ COLLECTION }
      
       - run: ls -R
      
