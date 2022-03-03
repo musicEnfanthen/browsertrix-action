@@ -50,7 +50,7 @@ jobs:
         uses: JasonEtco/create-an-issue@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_REPO: ${{ github.repository }}
+          URL: ${{ github.event.inputs.url }}
           RUN_ID: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
           filename: .github/browsertrix-issue-template.md
