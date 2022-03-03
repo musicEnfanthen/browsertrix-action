@@ -40,3 +40,14 @@ jobs:
         with:
           name: ${{env.COLLECTION}}
           path: ${{ github.workspace }}/crawls/collections/${{env.COLLECTION}}/${{env.COLLECTION}}.wacz
+
+      - name: Create issue for finished collection
+        if: success()
+        id: create-issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAIN_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          filename: .github/browsertrix-issue-template.md
