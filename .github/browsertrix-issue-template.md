@@ -1,4 +1,4 @@
 ---
-title: Browsertrix action finished (via GH actions {{ event }})
+title: Browsertrix action: {{ env.URL }}
 ---
-{{ workflow }} finished action for {{ env.URL }}. Uploaded artifact can be found here: {{ env.RUN_ID }}
+{{ workflow }} finished successfully. Uploaded artifact can be found here: {{ env.RUN_ID }}
