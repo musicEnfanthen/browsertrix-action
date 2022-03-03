@@ -9,7 +9,7 @@ on:
 # globals
 env:
 # build artifacts
-  WACZ_BUILD: wacz-build
+  COLLECTION: ""
 
 jobs:
   crawl_url:
@@ -23,20 +23,20 @@ jobs:
           url=${url/https:\/\//}   # remove https://
           url=${url//\./_}         # replace all . with _
           url=${url//\//-}         # replace all / with -
-          echo ${url}
+          echo $url
           
-          echo COLLECTION=${url} >> $GITHUB_ENV
+          echo COLLECTION=$url >> $GITHUB_ENV
       
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
       
       - name: Crawl site
-        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${COLLECTION}
+        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${{env.COLLECTION}}
      
       - run: ls -R
      
       - name: Upload WACZ artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${COLLECTION}
-          path: ${{ github.workspace }}/crawls/collection/${COLLECTION}/${COLLECTION}.wacz
+          name: ${{env.COLLECTION}}
+          path: ${{ github.workspace }}/crawls/collection/${{env.COLLECTION}}/${{env.COLLECTION}}.wacz
