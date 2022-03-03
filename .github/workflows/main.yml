@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{env.COLLECTION}}
-          path: ${{ github.workspace }}/crawls/collection/${{env.COLLECTION}}/${{env.COLLECTION}}.wacz
+          path: ${{ github.workspace }}/crawls/collections/${{env.COLLECTION}}/${{env.COLLECTION}}.wacz
