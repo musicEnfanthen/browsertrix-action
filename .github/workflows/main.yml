@@ -10,6 +10,7 @@ on:
 env:
 # build artifacts
   COLLECTION: ""
+  INCLUDE_PATH: ""
 
 jobs:
   crawl_url:
@@ -24,17 +25,32 @@ jobs:
           url=${{ github.event.inputs.url }}
           url=${url/http:\/\//}    # remove http://
           url=${url/https:\/\//}   # remove https://
-          url=${url//\./_}         # replace all . with _
-          url=${url//\//-}         # replace all / with -
+          url=${url//\./-}         # replace all . with -
+          url=${url//\//_}         # replace all / with _
+          if [[ ${url:0:(-1)} -eq "_" ]]
+          then 
+            url=${url:0:(-1)}      # remove final _
+          fi
           echo $url
-          
           echo COLLECTION=$url >> $GITHUB_ENV
       
+      - name: Get subdomain include from url
+        run: |
+          includePath=${{ github.event.inputs.url }}
+          includePath=${includePath/http:\/\//}    # remove http://
+          includePath=${includePath/https:\/\//}   # remove https://
+          includePath=${includePath/www./}         # remove www.
+          includePath=${includePath/./\\\.}        # replace . with \.
+          includePath=".*\.${includePath}"         # add prefix
+          
+          echo $includePath
+          echo INCLUDE_PATH=$includePath >> $GITHUB_ENV
+          
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
       
       - name: Crawl site
-        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --url ${{ github.event.inputs.url }} --workers 16 --saveState always --generateWACZ --text --collection ${{env.COLLECTION}}
+        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --workers 16 --saveState always --url ${{ github.event.inputs.url }} --seeds ${{ github.event.inputs.url }} --include ${{ env.INCLUDE_PATH }} --generateWACZ --text --collection ${{ env.COLLECTION }}
      
       - run: ls -R
      
