@@ -19,6 +19,9 @@ jobs:
     
       - name: Checkout repo
         uses: actions/checkout@v2
+        
+      - name: Check disk usage
+        run: du -h
       
       - name: Get collection name from URL
         run: |
@@ -45,12 +48,16 @@ jobs:
           
           echo $includePath
           echo INCLUDE_PATH=$includePath >> $GITHUB_ENV
-          
+    
       - name: Setup docker
         run: docker pull webrecorder/browsertrix-crawler
       
       - name: Crawl site
         run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --workers 16 --saveState always --url ${{ github.event.inputs.url }} --seeds ${{ github.event.inputs.url }} --include ${{ env.INCLUDE_PATH }} --generateWACZ --text --collection ${{ env.COLLECTION }}
+     
+      - name: Check disk usage
+        if: always()
+        run: du -h
      
       - run: ls -R
      
