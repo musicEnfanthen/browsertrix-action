@@ -3,14 +3,38 @@ on:
   workflow_dispatch: # trigger manually
     inputs:
         url:
-          description: 'Url to crawl'
+          description: "Url to crawl"
           required: true
+        scopetype:
+          description: "Scope type"
+          required: false
+          default: "domain"
+        include_one:
+          description: "Include 1"
+          required: false
+          default: ""
+        include_two:
+          description: "Include 2"
+          required: false
+          default: ""
+        exclude_one:
+          description: "Exclude 1"
+          required: false
+          default: ""
+        exclude_two:
+          description: "Exclude 2"
+          required: false
+          default: ""
+
 
 # globals
 env:
 # build artifacts
   COLLECTION: ""
-  INCLUDE_PATH: ""
+  INCLUDE_ONE: ""
+  INCLUDE_TWO: ""
+  EXCLUDE_ONE: ""
+  EXCLUDE_TWO: ""
 
 jobs:
   crawl_url:
@@ -20,9 +44,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
         
-      - name: Check disk usage
-        run: du -h
-      
+      - name: Setup docker
+        run: docker pull webrecorder/browsertrix-crawler:latest
+       
       - name: Get collection name from URL
         run: |
           url=${{ github.event.inputs.url }}
@@ -30,34 +54,56 @@ jobs:
           url=${url/https:\/\//}   # remove https://
           url=${url//\./-}         # replace all . with -
           url=${url//\//_}         # replace all / with _
-          if [[ ${url:0:(-1)} -eq "_" ]]
+          
+          lastchar=${url: -1}      # check for last char and remove _ if needed 
+          if [[ ${lastchar} == "_" ]]
           then 
-            url=${url:0:(-1)}      # remove final _
+            url=${url:0:(-1)}
           fi
+          
           echo $url
           echo COLLECTION=$url >> $GITHUB_ENV
-      
-      - name: Get subdomain include from url
-        run: |
-          includePath=${{ github.event.inputs.url }}
-          includePath=${includePath/http:\/\//}    # remove http://
-          includePath=${includePath/https:\/\//}   # remove https://
-          includePath=${includePath/www./}         # remove www.
-          includePath=${includePath/./\\\.}        # replace . with \.
-          includePath=".*\.${includePath}"         # add prefix
           
-          echo $includePath
-          echo INCLUDE_PATH=$includePath >> $GITHUB_ENV
-    
-      - name: Setup docker
-        run: docker pull webrecorder/browsertrix-crawler
+      - name: Set include option 1
+        if: ${{ github.event.inputs.include_one}}
+        run: |
+          in="--include ${{ github.event.inputs.include_one }}"
+          echo INCLUDE_ONE=$in >> $GITHUB_ENV 
+      
+      - name: Set include option 2
+        if: ${{ github.event.inputs.include_two}}
+        run: |
+          in="--include ${{ github.event.inputs.include_two }}"
+          echo INCLUDE_TWO=$in >> $GITHUB_ENV 
+      
+      - name: Set exclude option 1
+        if: ${{ github.event.inputs.exclude_one}}
+        run: |
+          ex="--exclude ${{ github.event.inputs.exclude_one }}"
+          echo EXCLUDE_ONE=$ex >> $GITHUB_ENV 
+      
+      - name: Set exclude option 2
+        if: ${{ github.event.inputs.exclude_two}}
+        run: |
+          ex="--exclude ${{ github.event.inputs.exclude_two }}"
+          echo EXCLUDE_TWO=$ex >> $GITHUB_ENV 
       
       - name: Crawl site
-        run: docker run -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl --workers 16 --saveState always --url ${{ github.event.inputs.url }} --seeds ${{ github.event.inputs.url }} --include ${{ env.INCLUDE_PATH }} --generateWACZ --text --collection ${{ env.COLLECTION }}
-     
-      - name: Check disk usage
-        if: always()
-        run: du -h
+        run: >
+          docker run
+          -v $PWD/crawls:/crawls/ webrecorder/browsertrix-crawler crawl
+          --workers 16
+          --saveState always
+          --url ${{ github.event.inputs.url }}
+          --seeds ${{ github.event.inputs.url }}
+          --scopeType ${{ github.event.inputs.scopetype }}
+          ${{ env.INCLUDE_ONE }}
+          ${{ env.INCLUDE_TWO }}
+          ${{ env.EXCLUDE_ONE }}
+          ${{ env.EXCLUDE_TWO }}
+          --generateWACZ
+          --text
+          --collection ${{ env.COLLECTION }}
      
       - run: ls -R
      
